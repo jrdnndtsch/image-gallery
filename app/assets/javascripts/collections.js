@@ -4,7 +4,9 @@ var CollectionsController = Paloma.controller('Collections', {
 		var blockOptions = {
 			container: 'grid'
 		}
-		new App.addBlock(blockOptions);
+		$('[data-trigger=new-block]').on('click', function(){
+			new App.addBlock(blockOptions);
+		})
 
 	}, 
 	index: function(){
@@ -21,5 +23,5 @@ window.App.addBlock = function(options){
 }
 
 App.createBlock = function(){
-	return '<h2>block</h2>'
+	return '<div class="block-select"><span>block 1</span><span>block 2</span><span>block 3</span></div>'
 }
