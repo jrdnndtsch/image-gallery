@@ -7,6 +7,11 @@ Rails.application.routes.draw do
     get 'logout' => :destroy, :as => :logout
   end
   resources :collections
+
+  get 'add_block' => 'collections#block'
+  get 'add_image' => 'collections#add_image'
+  get 'update_config' => 'collections#update_config'
+
   root :to => 'collections#index'
   
   # The priority is based upon order of creation: first created -> highest priority.

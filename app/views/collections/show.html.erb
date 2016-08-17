@@ -1,12 +1,144 @@
 <section>
 	<div class="card columns eight">
 		<h3><%= @collection.title%></h3>
+		<% if @collection.metafields.present?%>
+			<% @blocks.each do |m|%>
+				<% @imgs = m.value.split(';;')%>
+				<% block_type = @imgs.pop %>
+				<% if block_type == '1' || block_type == '2' || block_type == '3' %>
+					<% @img_1 = @imgs[0].split(':::')%>
+					<% @img_2 = @imgs[1].split(':::')%>
+					<% if block_type == '1' || block_type == '2'%>
+						<% @img_3 = @imgs[2].split(':::')%>
+					<% end %>
+				<% end %>
+					<% if block_type == '1' %>
+						<div class="flex-container margin-bottom-20">
+							<div class="two--thirds overlay-container">
+								<img src="<%= @img_1[0]%>" alt="">
+								<div class="overlay" style="background: <%= @background_color%>; color: <%= @text_color%>"><%= @img_1[1]%> | <%= @img_1[2]%></div>
+							</div>
+							<div class="one--third">
+								<div class="overlay-container">
+									<img src="<%= @img_2[0]%>" alt="">
+									<div class="overlay"><%= @img_2[1]%> | <%= @img_2[2]%></div>
+								</div>
+								<div class="overlay-container">
+									<img src="<%= @img_3[0]%>" alt="">
+									<div class="overlay"><%= @img_3[1]%> | <%= @img_3[2]%></div>
+								</div>
+							</div>
+						</div>
+						<%= link_to 'delete', collection_path(m.id, collection: @collection, type: @type), method: :delete, class: 'button button--secondary button--destroy'%>
+					<% elsif	block_type == '2'%>
+						<div class="flex-container margin-bottom-20">
+							<div class="third overlay-container">
+								<img src="<%= @img_1[0]%>" alt="">
+								<div class="overlay"><%= @img_1[1]%> | <%= @img_1[2]%></div>
+							</div>
+							<div class="third overlay-container">
+								<img src="<%= @img_2[0]%>" alt="">
+								<div class="overlay"><%= @img_2[1]%> | <%= @img_2[2]%></div>
+							</div>
+							<div class="third overlay-container">
+								<img src="<%= @img_3[0]%>" alt="">
+								<div class="overlay"><%= @img_3[1]%> | <%= @img_3[2]%></div>
+							</div>
+						</div>
+						<%= link_to 'delete', collection_path(m.id, collection: @collection, type: @type), method: :delete, class: 'button button--secondary button--destroy'%>
+					<% elsif block_type == '3'%>	
+						<div class="flex-container margin-bottom-20">
+							<div class="half overlay-container">
+								<img src="<%= @img_1[0]%>" alt="">
+								<div class="overlay"><%= @img_1[1]%> | <%= @img_1[2]%></div>
+							</div>
+							<div class="half overlay-container">
+								<img src="<%= @img_2[0]%>" alt="">
+								<div class="overlay"><%= @img_2[1]%> | <%= @img_2[2]%></div>
+							</div>
+						</div>
+						<%= link_to 'delete', collection_path(m.id, collection: @collection, type: @type), method: :delete, class: 'button button--secondary button--destroy'%>
+					<% end %>
+			<% end %>
+		<% end %>
+		<p><%= @products.first.title%> | <%=@products.first.images.first.src%> | <%= @products.first.id%></p>
 		<div id="grid">
 			
 		</div>
 	</div>
-	<div class="card columns four">
+	<div class="card columns four" id="config-panel">
 		<p>Card</p>
-		<button class="button secondary" data-trigger="new-block">Add new row</button>
+		<%= link_to 'add block one', add_block_path(block_type: '1', collection: @collection, type: @type), :remote => true, class: 'button secondary' %>
+		<%= link_to 'add block two', add_block_path(block_type: '2'), :remote => true, class: 'button secondary' %>
+		<%= link_to 'add block three', add_block_path(block_type: '3'), :remote => true, class: 'button secondary' %>
+
+		<h2>Color</h2>
+		<form action="" id="config-form">
+			<label for="background-color">Overlay Background</label>
+			<input type="color" id="background-color" name="background-color" value="<%= @background_color%>">
+			<label for="text-color">Overlay Text Color</label>
+			<input type="color" id="text-color" name="text-color" value="<%= @text_color%>">
+			<div id="cp2" class="input-group colorpicker-component">
+			    <input type="text" value="#00AABB" class="form-control" />
+			    <span class="input-group-addon"><i></i></span>
+			</div>
+			<label for="include-price">Include price on overlay</label>
+			<input type="checkbox" id="include-price" name="include-price">
+		</form>
 	</div>
 </section>
+
+<div class="modal hidden" id="image-gallery">
+	<div class="image-gallery flex-container">
+		<% @products.each do |product|%>
+			<% product.images.each do |image|%>
+				<img src="<%= image.src %>" alt="product.title" data-producttitle="<%= product.title%>" data-productid="<%= product.id%>">
+			<% end %>
+		<% end %>
+	</div>
+</div>
+<script>
+	$('#cp2').colorpicker();
+	$('body').on('click','.add-block', function(){
+		var images = $(this).parent('.card').find('.data-image')
+		var block_type = $(this).data('blocktype')
+		var images_array = images.map(function(i, image){
+			console.log(image, i)
+			return $(image).data('image')
+		}).toArray()
+
+		images_string = images_array.join(';;')
+		console.log(images_array, 'array')
+		$.ajax({
+	        url: '/add_image',
+	        type: 'GET',
+	        data: {
+	          collection: <%= @collection.id%>, 
+	          type: '<%= @type.to_s%>', 
+	          block_type: block_type, 
+	          images: images_string
+	        },
+	        dataType: 'script'
+      	});
+	})
+
+	$('#config-panel').on('change', function(){
+		var form_data = $('#config-form').serializeArray()
+		console.log(form_data)
+		var data = form_data.map(function(el, i){
+			return el.value
+		})
+		data = data.join(';;')
+
+		$.ajax({
+	        url: '/update_config',
+	        type: 'GET',
+	        data: {
+	          collection: <%= @collection.id%>, 
+	          type: '<%= @type.to_s%>', 
+	          config_data: data
+	        },
+	        dataType: 'script'
+     });
+	})
+</script>

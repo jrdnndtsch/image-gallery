@@ -1,0 +1,7 @@
+if(<%= @block_type%> == 1){
+	$('#grid').append("<%= escape_javascript(render :partial => 'block_one_fields', :locals => {collection: @collection}) %>");
+}else if(<%= @block_type%> == 2){
+	$('#grid').append("<%= escape_javascript(render :partial => 'block_two_fields') %>");
+}else if (<%= @block_type%> == 3){
+	$('#grid').append("<%= escape_javascript(render :partial => 'block_three_fields') %>");
+}
